@@ -515,7 +515,7 @@
                 <img src="assets/SCVRM_Intro.webp"
                     alt="Comparison between SCVRM and Mixup on a 2-D plot and example dense classification data."
                     style="width: 100%;" loading="lazy">
-                <figcaption>
+                <!-- <figcaption>
                     An illustration of Mixup and SCVRM on a 2-D plot and example dense classification data where circles
                     with a solid boundary denote labelled images. In Mixup, vicinal images (circles with a dashed
                     boundary) are distributed only on the convex hull of the available data. In contrast, vicinal data
@@ -526,7 +526,7 @@
                     labelled images. As a result, label of the vicinal image (crossed circle with olive green colour)
                     has consistently reduced label confidence across all pixels in SCVRM, while presenting irregular
                     patterns in Mixup.
-                </figcaption>
+                </figcaption> -->
             </div>
         </center>
     </div>
@@ -543,13 +543,13 @@
         <h2>Overview</h2>
         <hr>
         <p>
-            We address a fundamental question: <b><em style="color: green;">Can latent diffusion models and their VAE
-                    tokenizer be trained end-to-end?</em></b> While training both components jointly with standard
-            diffusion loss is observed to be ineffective — often degrading final performance — we show that this
-            limitation can be overcome using a simple representation-alignment (REPA) loss. Our proposed method,
-            <b>REPA-E</b>, enables stable and effective joint training of both the VAE and the diffusion model,
-            achieving state-of-the-art FID scores of <b>1.26</b> and <b>1.83</b> with and without classifier-free
-            guidance on ImageNet 256×256.
+            This work addresses a fundamental machine/deep learning problem: <b><em style="color: green;">model
+                    calibration - does the empirical class distribution conditioned on probabilistic model prediction
+                    matches the predicted distribution.</em></b>
+            We propose a <b>Self-Calibrating Vicinal Risk Minimisation (SCVRM)</b> that explores the vicinal data space
+            where augmented data with increasing distance to the labelled data are assigned less confident labels.
+            Experimental results demonstrate that SCVRM can significantly enhance model calibration for different dense
+            classification tasks on both in-distribution and out-of-distribution data.
         </p>
 
         <center>

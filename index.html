@@ -555,62 +555,38 @@
             Experimental results demonstrate that SCVRM can significantly enhance model calibration for different dense
             classification tasks on both in-distribution and out-of-distribution data.
         </p>
-
-        <!-- <center>
-            <div class="figure">
-                <img src="assets/a-overview-v4.webp" alt="REPA-E Overview" style="max-width: 100%; height: auto;"
-                    loading="lazy">
-            </div>
-        </center>
-
-        Through extensive evaluations, we demonstrate that our end-to-end training approach <b>REPA-E</b> offers four
-        key advantages:
-        <p>
-            <b>1. Accelerated Generation Performance:</b> REPA-E significantly speeds up diffusion training by over
-            <b>17×</b> and <b>45×</b> compared to REPA and vanilla training recipes, respectively, while achieving
-            superior quality.
-        </p>
-
-        <p>
-            <b>2. Improved VAE Latent-Space Structure:</b> Joint tuning adaptively enhances latent space structure
-            across different VAE architectures, addressing their specific limitations without explicit regularization.
-        </p>
-
-        <p>
-            <b>3. Superior Drop-in VAE Replacements:</b> The resulting <b>E2E-VAE</b> serves as a <b>drop-in
-                replacement</b> for existing VAEs (e.g., SD-VAE), improving convergence and generation quality across
-            diverse LDM architectures.
-        </p>
-
-        <p>
-            <b>4. Effective From-Scratch Training:</b> REPA-E enables joint training of both VAE and LDM from scratch,
-            still achieving superior performance compared to traditional training approaches.
-        </p> -->
     </section>
 
     <section id="1 - code snippet">
         <h2>1. Using SCVRM in your code base</h2>
         <p>Define the vicinal sampling function as in the paper:</p>
         <pre><code class="language-python">
-        def scvrm_data(x, y, eta, zeta):
-            """Returns vicinal data (input-label pair)"""
-            b = x.shape[0]
-            sqrt_d = math.sqrt(x[0, :, :, :].numel())
-        
-            # Vicinal inputs according to Equation (13).
-            z = torch.rand_like(x).cuda()
-            v = (torch.rand(b).cuda() * zeta + 1.0) * sqrt_d
-            z_norm = z.view(b, -1).norm(p = 2, dim = 1)
-            add_noise = v.view(b, 1, 1, 1) * z / z_norm.view(b, 1, 1, 1)
-            x_vicinal = x.clone().detach() + add_noise
-        
-            # Vicinal labels according to Equations (8) and (9).
-            add_noise_norm = add_noise.view(b, -1).norm(p = 2, dim = 1)
-            varphi = 1 - torch.exp(- (add_noise_norm / (eta * sqrt_d)).pow(2))
-        
-            y_vicinal = (1 - varphi).view(b, 1) * y + (varphi / 10).view(b, 1)
-        
-            return x_vicinal, y_vicinal
+            def scvrm_data(x, y, eta, zeta):
+                """Returns vicinal data (input-label pair)"""
+                b = x.shape[0]
+                sqrt_d = math.sqrt(x[0, :, :, :].numel())
+            
+                # Vicinal inputs according to Equation (13).
+                z = torch.rand_like(x).cuda()
+                v = (torch.rand(b).cuda() * zeta + 1.0) * sqrt_d
+                z_norm = z.view(b, -1).norm(p = 2, dim = 1)
+                add_noise = v.view(b, 1, 1, 1) * z / z_norm.view(b, 1, 1, 1)
+                x_vicinal = x.clone().detach() + add_noise
+            
+                # Vicinal labels according to Equations (8) and (9).
+                add_noise_norm = add_noise.view(b, -1).norm(p = 2, dim = 1)
+                varphi = 1 - torch.exp(- (add_noise_norm / (eta * sqrt_d)).pow(2))
+            
+                y_vicinal = (1 - varphi).view(b, 1) * y + (varphi / 10).view(b, 1)
+            
+                return x_vicinal, y_vicinal
+        </code></pre>
+        <p>Define the training loss w.r.t. the probabilistic label:</p>
+        <pre><code class="language-python">
+            def cross_entropy_soft_labels(logits, labels):
+                log_probs = F.log_softmax(logits, dim=1)  # (B, K)
+                loss = -(labels * log_probs).mean(dim=1)   # (B,)
+                return loss.mean()
         </code></pre>
     </section>
 

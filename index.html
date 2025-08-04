@@ -581,6 +581,14 @@
             
                 return x_vicinal, y_vicinal
         </code></pre>
+        <center>
+            <div class="figure">
+                <img src="assets/Example_Vicinal_Images.webp" alt="Examples of sampled vicinal data."
+                    style="max-width: 100%; height: auto;" loading="lazy">
+                <figcaption>Examples of sampled vicinal data</figcaption>
+            </div>
+        </center>
+
         <p>Define the training loss w.r.t. the probabilistic label:</p>
         <pre><code class="language-python">
             def cross_entropy_soft_labels(logits, labels):

@@ -552,7 +552,7 @@
             classification tasks on both in-distribution and out-of-distribution data.
         </p>
 
-        <center>
+        <!-- <center>
             <div class="figure">
                 <img src="assets/a-overview-v4.webp" alt="REPA-E Overview" style="max-width: 100%; height: auto;"
                     loading="lazy">
@@ -581,38 +581,33 @@
         <p>
             <b>4. Effective From-Scratch Training:</b> REPA-E enables joint training of both VAE and LDM from scratch,
             still achieving superior performance compared to traditional training approaches.
-        </p>
+        </p> -->
     </section>
 
-    <section id="1-accelerated-performance">
-        <h2>1. End-to-End Training Leads to Accelerated Generation Performance</h2>
-        <hr>
-
-        <ul>
-            <li><b>Better performance with fewer epochs:</b> REPA-E achieves gFID of <b>4.07</b> in just 80 epochs,
-                significantly outperforming MaskDiT (<b>5.69</b> with 1600 epochs) and FasterDiT (<b>7.91</b> with 400
-                epochs)</li>
-            <li><b>Robust across architectures:</b> Performance improvements remain consistent across different model
-                scales (SiT-B/L/XL) and VAE architectures (SD-VAE, IN-VAE, VA-VAE), demonstrating the method's
-                versatility</li>
-            <li><b>Enhanced image quality across training:</b> Using identical noise and labels, REPA-E generates
-                structurally superior images compared to REPA baseline at 50K, 100K, and 400K training iterations</li>
-        </ul>
-
-        <center>
-            <div class="figure">
-                <img src="assets/repae-eval-combined.webp" alt="Combined" style="max-width: 95%; height: auto;"
-                    loading="lazy">
-            </div>
-        </center>
-
-        <center>
-            <div class="figure">
-                <img src="assets/visual-scaling-v4.webp"
-                    alt="Qualitative comparison between REPA and REPA-E at different training iterations"
-                    style="max-width: 100%; height: auto;" loading="lazy">
-            </div>
-        </center>
+    <section id="1 - code snippet">
+        <h2>1. Using SCVRM in your code base</h2>
+        <p>Define the vicinal sampling function as in the paper:</p>
+        <pre><code class="language-python">
+            def scvrm_data(x, y, eta, zeta):
+            """Returns vicinal data (input-label pair)"""
+            b = x.shape[0]
+            sqrt_d = math.sqrt(x[0, :, :, :].numel())
+        
+            # Vicinal inputs according to Equation (13).
+            z = torch.rand_like(x).cuda()
+            v = (torch.rand(b).cuda() * zeta + 1.0) * sqrt_d
+            z_norm = z.view(b, -1).norm(p = 2, dim = 1)
+            add_noise = v.view(b, 1, 1, 1) * z / z_norm.view(b, 1, 1, 1)
+            x_vicinal = x.clone().detach() + add_noise
+        
+            # Vicinal labels according to Equations (8) and (9).
+            add_noise_norm = add_noise.view(b, -1).norm(p = 2, dim = 1)
+            varphi = 1 - torch.exp(- (add_noise_norm / (eta * sqrt_d)).pow(2))
+        
+            y_vicinal = (1 - varphi).view(b, 1) * y + (varphi / 10).view(b, 1)
+        
+            return x_vicinal, y_vicinal
+        </code></pre>
     </section>
 
     <section id="2-improved-latent-space">
